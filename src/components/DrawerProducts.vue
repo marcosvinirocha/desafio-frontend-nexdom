@@ -28,7 +28,19 @@ import * as z from 'zod'
 import { useForm } from 'vee-validate';
 import { useProductStore } from '@/stores/productsStore';
 import { toast } from 'vue-sonner'
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
+import { Pencil } from 'lucide-vue-next'
+
+const props = defineProps({
+    isEditing: {
+        type: Boolean,
+        default: false,
+    },
+    product: {
+        type: Object,
+        default: () => ({}),
+    },
+})
 
 const productStore = useProductStore();
 const closeButtonRef = ref<InstanceType<typeof SheetClose> | null>(null)
@@ -43,19 +55,29 @@ const schema = toTypedSchema(z.object({
 
 const form = useForm({
     validationSchema: schema,
+    initialValues: {
+        codigo: props.product.codigo,
+        descricao: props.product.descricao,
+        tipo: props.product.tipo,
+        valorFornecedor: props.product.valorFornecedor,
+        quantidadeEstoque: props.product.quantidadeEstoque,
+    },
 })
 
 
 const onSubmit = form.handleSubmit(async (values) => {
     try {
-        await productStore.addProduct(values);
-        toast.success('Produto adicionado com sucesso');
-        const element = closeButtonRef.value?.$el as HTMLElement;
-        if (element) {
-            element.click();
+        if (props.isEditing) {
+            await productStore.updateProduct(props.product.id, values);
+            toast.success('Produto atualizado com sucesso');
+            await productStore.getProducts();
         } else {
-            (closeButtonRef.value as any)?.click();
+            await productStore.addProduct(values);
+            toast.success('Produto adicionado com sucesso');
+            await productStore.getProducts();
         }
+        const element = closeButtonRef.value?.$el as HTMLElement;
+        element?.click();
         form.resetForm();
     } catch (error) {
         toast.error('Erro ao adicionar produto');
@@ -63,20 +85,35 @@ const onSubmit = form.handleSubmit(async (values) => {
 
     console.log(values);
 })
+
+watch(() => props.product, (newProduct) => {
+    form.setValues({
+        codigo: newProduct.codigo,
+        descricao: newProduct.descricao,
+        tipo: newProduct.tipo,
+        valorFornecedor: newProduct.valorFornecedor,
+        quantidadeEstoque: newProduct.quantidadeEstoque,
+    })
+}, { deep: true, immediate: true })
 </script>
 
 <template>
     <Sheet>
         <SheetTrigger>
-            <Button variant="default">
-                Criar Produto
+            <Button :variant="isEditing ? 'outline' : 'default'">
+                <template v-if="isEditing">
+                    <Pencil class="w-5 h-5" />
+                </template>
+                <template v-else>
+                    Criar Produto
+                </template>
             </Button>
 
         </SheetTrigger>
         <SheetContent>
             <SheetClose ref="closeButtonRef" class="hidden" />
             <SheetHeader>
-                <SheetTitle class="text-2xl font-bold">Criar Produto</SheetTitle>
+                <SheetTitle class="text-2xl font-bold">{{ isEditing ? 'Editar Produto' : 'Criar Produto' }}</SheetTitle>
             </SheetHeader>
             <form @submit="onSubmit" class="p-5">
                 <FormField v-slot="{ componentField }" name="codigo">
@@ -90,7 +127,7 @@ const onSubmit = form.handleSubmit(async (values) => {
                 </FormField>
                 <FormField v-slot="{ componentField }" name="descricao">
                     <FormItem>
-                        <FormLabel>Descricao</FormLabel>
+                        <FormLabel>Descrição</FormLabel>
                         <FormControl>
                             <Input placeholder="Descreva o produto" class="mb-2" v-bind="componentField" />
                         </FormControl>
