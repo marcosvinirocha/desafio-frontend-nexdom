@@ -1,7 +1,7 @@
 <template>
   <h1>Dashboard</h1>
   <Stats />
-  <div class="flex gap-2 items-center justify-around mr-60">
+  <div class="flex gap-2 items-center justify-around mr-96">
     <Table />
     <Table />
   </div>
