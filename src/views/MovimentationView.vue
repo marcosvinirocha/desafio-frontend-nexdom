@@ -1,3 +1,7 @@
+<script setup lang="ts">
+import StockMovimentation from '@/components/StockMovimentation.vue';
+</script>
+
 <template>
-  <h1>Movimentações</h1>
+  <StockMovimentation />
 </template>
