@@ -13,6 +13,8 @@ export interface Produto {
 
 export const useProductStore = defineStore("product", () => {
   const products = ref<Produto[]>([]);
+  const productsByType = ref<Produto[]>([]);
+  const productsByProfit = ref<Produto[]>([]);
   const loading = ref(false);
   const error = ref<string | null>(null);
 
@@ -62,13 +64,41 @@ export const useProductStore = defineStore("product", () => {
     }
   }
 
+  async function getProductsByType() {
+    loading.value = true;
+    try {
+      const response = await api.get("/produtos/resumo-por-tipo");
+      productsByType.value = response.data;
+    } catch (err) {
+      error.value = "Erro ao buscar produtos";
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  async function getProductsByProfit() {
+    loading.value = true;
+    try {
+      const response = await api.get("/produtos/lucro-por-produto");
+      productsByProfit.value = response.data;
+    } catch (err) {
+      error.value = "Erro ao buscar produtos";
+    } finally {
+      loading.value = false;
+    }
+  }
+
   return {
     products,
+    productsByType,
+    productsByProfit,
     loading,
     error,
     addProduct,
     getProducts,
     updateProduct,
     deleteProduct,
+    getProductsByType,
+    getProductsByProfit,
   };
 });
