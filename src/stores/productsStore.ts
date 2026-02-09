@@ -11,10 +11,27 @@ export interface Produto {
   quantidadeEstoque: number;
 }
 
+export interface ProdutoPorTipo {
+  produtoId: number;
+  codigo: string;
+  descricao: string;
+  tipo: "ELETRONICO" | "ELETRODOMESTICO" | "MOVEL";
+  quantidadeTotalSaida: number;
+  quantidadeDisponivel: number;
+}
+
+export interface ProdutoPorLucro {
+  produtoId: number;
+  codigo: string;
+  descricao: string;
+  quantidadeTotalSaida: number;
+  lucroTotal: number;
+}
+
 export const useProductStore = defineStore("product", () => {
   const products = ref<Produto[]>([]);
-  const productsByType = ref<Produto[]>([]);
-  const productsByProfit = ref<Produto[]>([]);
+  const productsByType = ref<ProdutoPorTipo[]>([]);
+  const productsByProfit = ref<ProdutoPorLucro[]>([]);
   const loading = ref(false);
   const error = ref<string | null>(null);
 

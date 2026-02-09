@@ -46,6 +46,8 @@ const onSubmit = form.handleSubmit(async (values) => {
         toast.success('Movimentação registrada com sucesso!');
         form.resetForm();
         await productStore.getProducts();
+        await productStore.getProductsByType();
+        await productStore.getProductsByProfit();
     } catch (error) {
         toast.error('Erro ao registrar movimentação. Verifique o estoque.');
     }
